@@ -5,27 +5,17 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/eks"
 )
 
-func startSession() {
-	sess, err := session.NewSessionWithOptions(session.Options{
-		// Specify profile to load for the session's config
-		Profile: "dev",
+// GetEKSVersion Obtain AWS EKS Version
+func GetEKSVersion(awsProfile []string) {
 
-		// Provide SDK Config options, such as Region.
-		Config: aws.Config{
-			Region: aws.String(awsRegion),
-		},
-
-		// Force enable Shared Config support
-		SharedConfigState: session.SharedConfigEnable,
-	})
+	sess := sessionHelper(awsProfile[0])
 
 	svc := eks.New(sess)
 	input := &eks.DescribeClusterInput{
-		Name: aws.String("devel"),
+		Name: aws.String(awsProfile[1]),
 	}
 
 	result, err := svc.DescribeCluster(input)
@@ -51,5 +41,5 @@ func startSession() {
 		return
 	}
 
-	fmt.Println(result)
+	fmt.Printf("%v\nversion: %v\n", aws.StringValue(result.Cluster.Arn), aws.StringValue(result.Cluster.Version))
 }

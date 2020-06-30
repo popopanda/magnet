@@ -10,9 +10,9 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "magnet",
 	Short: "Magnet simplifies commands",
-	Long:  `Created to simplify some tasks that Jeffrey does day to day`,
+	Long:  `Created to simplify some tasks that Devops does day to day`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Get Started")
+		fmt.Println("welcome")
 	},
 }
 
