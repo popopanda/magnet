@@ -10,8 +10,8 @@ func init() {
 }
 
 var eksUpgradeCmd = &cobra.Command{
-	Use:   "eks-upgrade [profile] [cluster-name] [version]",
-	Short: "Upgrade EKS Version to targeted version",
+	Use:   "eks-upgrade-cluster [profile] [cluster-name] [version]",
+	Short: "Upgrade EKS Cluster version to targeted version",
 	Args:  cobra.MinimumNArgs(3),
 	Run: func(cmd *cobra.Command, args []string) {
 		awshelper.EKSUpgrade(args)

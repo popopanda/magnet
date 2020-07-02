@@ -1,15 +1,14 @@
 package awshelper
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/eks"
 )
 
 // GetEKSVersion Obtain AWS EKS Version
-func GetEKSVersion(awsProfile []string) {
+func GetEKSVersion(awsProfile []string) (string, string) {
 
 	sess := sessionHelper(awsProfile[0])
 
@@ -20,26 +19,10 @@ func GetEKSVersion(awsProfile []string) {
 
 	result, err := svc.DescribeCluster(input)
 	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case eks.ErrCodeResourceNotFoundException:
-				fmt.Println(eks.ErrCodeResourceNotFoundException, aerr.Error())
-			case eks.ErrCodeClientException:
-				fmt.Println(eks.ErrCodeClientException, aerr.Error())
-			case eks.ErrCodeServerException:
-				fmt.Println(eks.ErrCodeServerException, aerr.Error())
-			case eks.ErrCodeServiceUnavailableException:
-				fmt.Println(eks.ErrCodeServiceUnavailableException, aerr.Error())
-			default:
-				fmt.Println(aerr.Error())
-			}
-		} else {
-			// Print the error, cast err to awserr.Error to get the Code and
-			// Message from an error.
-			fmt.Println(err.Error())
-		}
-		return
+		log.Fatal(err)
 	}
 
-	fmt.Printf("%v\nversion: %v\n", aws.StringValue(result.Cluster.Arn), aws.StringValue(result.Cluster.Version))
+	resultVersion := aws.StringValue(result.Cluster.Version)
+	resultArn := aws.StringValue(result.Cluster.Arn)
+	return resultVersion, resultArn
 }
