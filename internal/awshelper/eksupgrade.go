@@ -25,5 +25,5 @@ func EKSUpgrade(awsProfile []string) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("EKS Upgrade in progress...\n%v\n%v", result.String, result.Update.Status)
+	fmt.Printf("EKS Upgrade in progress...\n%v\n%v", result.String(), aws.StringValue(result.Update.Status))
 }
