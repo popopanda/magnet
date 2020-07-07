@@ -16,14 +16,20 @@ type patchStringValue struct {
 
 // K8NodeDrain drains the node
 func K8NodeDrain(nodeList []string) {
-	k8NodeCordon(nodeList)
+
+	for _, i := range nodeList {
+		k8NodeCordon(i)
+		fmt.Printf("%v marked as unschedulable\n", i)
+		// k8NodeEvictPods()
+		fmt.Printf("%v Evicted\n", i)
+	}
 }
 
 // func k8NodeEvictPods() {
 
 // }
 
-func k8NodeCordon(nodeList []string) {
+func k8NodeCordon(nodeInstance string) {
 	clientSet := k8ClientInit()
 
 	payload := []patchStringValue{{
@@ -33,14 +39,9 @@ func k8NodeCordon(nodeList []string) {
 	}}
 	payloadBytes, _ := json.Marshal(payload)
 
-	for _, i := range nodeList {
-		_, err := clientSet.CoreV1().Nodes().Patch(i, types.JSONPatchType, payloadBytes)
+	_, err := clientSet.CoreV1().Nodes().Patch(nodeInstance, types.JSONPatchType, payloadBytes)
 
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		fmt.Printf("%v marked as unschedulable", i)
+	if err != nil {
+		log.Fatal(err)
 	}
-
 }
