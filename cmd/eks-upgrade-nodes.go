@@ -13,7 +13,7 @@ func init() {
 
 var k8UpgradeNodesCmd = &cobra.Command{
 	Use:   "eks-upgrade-nodes",
-	Short: "Upgrade the k8 nodes in the kubernetes cluster by draining each node, then contract and expand the ASGs",
+	Short: "Upgrade the k8 nodes in the kubernetes cluster by draining each node, then rolling the EC2 instances",
 	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Upgrading...")

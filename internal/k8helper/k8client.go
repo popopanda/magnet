@@ -1,7 +1,7 @@
 package k8helper
 
 import (
-	"flag"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -10,24 +10,18 @@ import (
 )
 
 func k8ClientInit() *kubernetes.Clientset {
-	var kubeconfig *string
-	if home := homeDir(); home != "" {
-		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-	} else {
-		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	}
-	flag.Parse()
+	home := homeDir()
+	kubeconfig := filepath.Join(home, ".kube", "config")
 
-	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
-		panic(err.Error())
+		log.Fatal(err)
 	}
 
-	// create the clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		panic(err.Error())
+		log.Fatal(err.Error())
+		os.Exit(1)
 	}
 
 	return clientset
