@@ -37,7 +37,7 @@ func k8DeleteNodePods(nodeInstance string) {
 		if i.Namespace == "kube-system" {
 			continue
 		} else {
-			fmt.Printf("Deleting %v...\n", i.Name)
+			fmt.Printf("Deleting pod: %v from %v\n", i.Name, nodeInstance)
 			err := clientSet.CoreV1().Pods(i.Namespace).Delete(i.Name, &metav1.DeleteOptions{})
 			if err != nil {
 				log.Fatal(err)
@@ -65,6 +65,6 @@ func k8NodeCordon(nodeInstance string) {
 		panic(err.Error())
 	}
 
-	fmt.Printf("%v marked as unschedulable\n", nodeInstance)
+	fmt.Printf("\n%v marked as unschedulable\n", nodeInstance)
 
 }

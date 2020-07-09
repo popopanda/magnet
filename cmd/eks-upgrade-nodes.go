@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/popopanda/magnet/internal/k8helper"
 	"github.com/spf13/cobra"
@@ -16,10 +17,22 @@ var k8UpgradeNodesCmd = &cobra.Command{
 	Short: "Upgrade the k8 nodes in the kubernetes cluster by draining each node, then rolling the EC2 instances",
 	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Upgrading...")
 		fmt.Println("This will take a moment...")
 
 		nodeNameList, _, _ := k8helper.K8GetNodesList()
-		k8helper.K8NodeDrain(nodeNameList)
+
+		fmt.Println("Rolling the following nodes: ")
+
+		for _, i := range nodeNameList {
+			fmt.Printf("%v\n", i)
+		}
+
+		if yesNo() {
+			k8helper.K8NodeDrain(nodeNameList)
+			//aws terminate instance, and wait for new instance
+		} else {
+			os.Exit(1)
+		}
+
 	},
 }
