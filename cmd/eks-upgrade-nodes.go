@@ -19,9 +19,7 @@ var k8UpgradeNodesCmd = &cobra.Command{
 		fmt.Println("Upgrading...")
 		fmt.Println("This will take a moment...")
 
-		nodeNameList, nodeIDList, _ := k8helper.K8GetNodesList()
-		fmt.Println(nodeNameList, nodeIDList)
-
+		nodeNameList, _, _ := k8helper.K8GetNodesList()
 		k8helper.K8NodeDrain(nodeNameList)
 	},
 }
