@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/popopanda/magnet/internal/awshelper"
 	"github.com/popopanda/magnet/internal/k8helper"
 	"github.com/spf13/cobra"
 )
@@ -13,13 +14,13 @@ func init() {
 }
 
 var k8UpgradeNodesCmd = &cobra.Command{
-	Use:   "eks-upgrade-nodes",
+	Use:   "eks-upgrade-nodes [profile]",
 	Short: "Upgrade the k8 nodes in the kubernetes cluster by draining each node, then rolling the EC2 instances",
-	Args:  cobra.MinimumNArgs(0),
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("This will take a moment...")
 
-		nodeNameList, _, _ := k8helper.K8GetNodesList()
+		nodeNameList, nodeIDList, _ := k8helper.K8GetNodesList()
 
 		fmt.Println("Rolling the following nodes: ")
 
@@ -28,7 +29,8 @@ var k8UpgradeNodesCmd = &cobra.Command{
 		}
 
 		if yesNo() {
-			k8helper.K8NodeDrain(nodeNameList)
+			// k8helper.K8NodeDrain(nodeNameList)
+			awshelper.AutoScaleRoll(nodeIDList, args)
 			//aws terminate instance, and wait for new instance
 		} else {
 			os.Exit(1)

@@ -35,6 +35,7 @@ func k8DeleteNodePods(nodeInstance string) {
 	}
 	for _, i := range pods.Items {
 		if i.Namespace == "kube-system" {
+			fmt.Printf("Skipping Kube-System Pod - %v\n", i.Name)
 			continue
 		} else {
 			fmt.Printf("Deleting pod: %v from %v\n", i.Name, nodeInstance)
