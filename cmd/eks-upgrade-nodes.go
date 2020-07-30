@@ -29,8 +29,9 @@ var k8UpgradeNodesCmd = &cobra.Command{
 		}
 
 		if yesNo() {
-			// k8helper.K8NodeDrain(nodeNameList)
 			awshelper.AutoScaleRoll(nodeIDList, args)
+			// wait 5 mins or wait til asg instances are cleared
+			k8helper.K8NodeDrain(nodeNameList)
 			//aws terminate instance, and wait for new instance
 		} else {
 			os.Exit(1)

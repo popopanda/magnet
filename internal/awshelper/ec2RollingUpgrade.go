@@ -10,21 +10,19 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-// set ASG to add 1 instance,
-// terminate old instance
-// wait new instance avaiable
-// proceed to next
-
 // AutoScaleRoll will expand the ASG, roll the instances
 func AutoScaleRoll(instanceIDList []string, awsProfile []string) {
 	sess := sessionHelper(awsProfile[0])
-	autoScaleGroupName := ""
+	var autoScaleGroupNames []string
+
 	for _, instanceID := range instanceIDList {
-		autoScaleGroupName = asgLocator(instanceID, sess)
-		break
+		autoScaleGroupNames = append(autoScaleGroupNames, asgLocator(instanceID, sess))
 	}
 
-	fmt.Println("Autoscalegroup name: ", autoScaleGroupName)
+	for _, autoScaleGroup := range autoScaleGroupNames {
+		fmt.Println("Scaling up: ", autoScaleGroup)
+		asgScaler(autoScaleGroup, *sess)
+	}
 }
 
 func asgLocator(instanceID string, sess *session.Session) string {
@@ -54,19 +52,45 @@ func asgLocator(instanceID string, sess *session.Session) string {
 	return ""
 }
 
-func asgScaleUp(asgName string, sess session.Session) {
-	svc := autoscaling.New()
+func asgScaler(asgName string, sess session.Session) {
+	svc := autoscaling.New(&sess)
+
+	currentCapacity := asgGetCurrentDesiredCap(asgName, svc)
+	scaledUpCapacity := currentCapacity + currentCapacity
+
 	input := &autoscaling.SetDesiredCapacityInput{
-		AutoScalingGroupName: aws.String("my-auto-scaling-group"),
-		DesiredCapacity:      aws.Int64(2),
+		AutoScalingGroupName: aws.String(asgName),
+		DesiredCapacity:      aws.Int64(scaledUpCapacity),
 		HonorCooldown:        aws.Bool(true),
 	}
 
-	result, err := svc.SetDesiredCapacity(input)
+	_, err := svc.SetDesiredCapacity(input)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Printf("Adding %v extra nodes to %v.\n", currentCapacity, asgName)
 }
 
-func ec2Terminate(asgName string) {
+func asgGetCurrentDesiredCap(asg string, service *autoscaling.AutoScaling) int64 {
+	input := &autoscaling.DescribeAutoScalingGroupsInput{
+		AutoScalingGroupNames: []*string{
+			aws.String(asg),
+		},
+	}
+
+	result, err := service.DescribeAutoScalingGroups(input)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, i := range result.AutoScalingGroups {
+		return aws.Int64Value(i.DesiredCapacity)
+	}
+
+	return 1
+}
+
+func TerminateEC2() {
+
 }
