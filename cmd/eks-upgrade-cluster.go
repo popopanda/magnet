@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/popopanda/magnet/internal/awshelper"
 	"github.com/spf13/cobra"
 )
@@ -14,6 +17,11 @@ var eksUpgradeCmd = &cobra.Command{
 	Short: "Upgrade EKS Cluster version to targeted version",
 	Args:  cobra.MinimumNArgs(3),
 	Run: func(cmd *cobra.Command, args []string) {
-		awshelper.EKSUpgrade(args)
+		fmt.Println("Proceed with upgrade?")
+		if yesNo() {
+			awshelper.EKSUpgrade(args)
+		} else {
+			os.Exit(1)
+		}
 	},
 }
