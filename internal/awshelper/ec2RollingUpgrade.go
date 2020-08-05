@@ -12,7 +12,7 @@ import (
 )
 
 // AutoScaleUp will expand the ASG, roll the instances
-func AutoScaleUp(instanceIDList []string, awsProfile []string) {
+func AutoScaleUp(instanceIDList []string, awsProfile []string) []string {
 	sess := sessionHelper(awsProfile[0])
 	var autoScaleGroupNames []string
 
@@ -24,8 +24,10 @@ func AutoScaleUp(instanceIDList []string, awsProfile []string) {
 
 	for _, autoScaleGroup := range cleanedAutoScaleGroupNames {
 		fmt.Println("Scaling up: ", autoScaleGroup)
-		asgScaler(autoScaleGroup, *sess)
+		asgScaleUp(autoScaleGroup, *sess)
 	}
+
+	return cleanedAutoScaleGroupNames
 }
 
 func asgLocator(instanceID string, sess *session.Session) string {
@@ -67,11 +69,11 @@ func removeDuplicateFromStringSlice(stringSlice []string) []string {
 	return list
 }
 
-func asgScaler(asgName string, sess session.Session) {
+func asgScaleUp(asgName string, sess session.Session) {
 	svc := autoscaling.New(&sess)
 
 	currentCapacity := asgGetCurrentDesiredCap(asgName, svc)
-	scaledUpCapacity := currentCapacity + 1
+	scaledUpCapacity := currentCapacity * 2
 
 	input := &autoscaling.SetDesiredCapacityInput{
 		AutoScalingGroupName: aws.String(asgName),
@@ -84,7 +86,7 @@ func asgScaler(asgName string, sess session.Session) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Adding %v extra nodes to %v.\n", currentCapacity, asgName)
+	fmt.Printf("Doubling the number of nodes in %v.\n", asgName)
 }
 
 func asgGetCurrentDesiredCap(asg string, service *autoscaling.AutoScaling) int64 {
@@ -135,6 +137,32 @@ func TerminateEC2(instanceIDList []string, awsProfile []string) {
 		}
 
 		fmt.Printf("Terminating: %v\n", instance)
+	}
+
+}
+
+// AsgScaleDown scale down the ASG by reducing by 50%
+func AsgScaleDown(asgNameList []string, awsProfile []string) {
+	sess := sessionHelper(awsProfile[0])
+	svc := autoscaling.New(sess)
+
+	for _, i := range asgNameList {
+
+		currentCapacity := asgGetCurrentDesiredCap(i, svc)
+		scaledDownCapacity := currentCapacity / 2
+
+		input := &autoscaling.SetDesiredCapacityInput{
+			AutoScalingGroupName: aws.String(i),
+			DesiredCapacity:      aws.Int64(scaledDownCapacity),
+			HonorCooldown:        aws.Bool(true),
+		}
+
+		_, err := svc.SetDesiredCapacity(input)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Printf("Reducing nodes in %v by 50%%\n", i)
 	}
 
 }

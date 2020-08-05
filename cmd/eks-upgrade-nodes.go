@@ -29,11 +29,12 @@ var k8UpgradeNodesCmd = &cobra.Command{
 		}
 
 		if yesNo() {
-			awshelper.AutoScaleUp(nodeIDList, args)
+			asgNameList := awshelper.AutoScaleUp(nodeIDList, args)
 			if yesNo() {
 				k8helper.K8NodeDrain(nodeNameList)
 				if yesNo() {
-					awshelper.TerminateEC2(nodeIDList, args)
+					// awshelper.TerminateEC2(nodeIDList, args)
+					awshelper.AsgScaleDown(asgNameList, args)
 				} else {
 					os.Exit(1)
 				}
