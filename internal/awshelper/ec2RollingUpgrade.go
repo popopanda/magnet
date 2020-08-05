@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -91,6 +92,35 @@ func asgGetCurrentDesiredCap(asg string, service *autoscaling.AutoScaling) int64
 	return 1
 }
 
-func TerminateEC2() {
+// TerminateEC2 terminates a list of ec2 instance ids
+func TerminateEC2(instanceIDList []string, awsProfile []string) {
+	sess := sessionHelper(awsProfile[0])
+	svc := ec2.New(sess)
+
+	for _, instance := range instanceIDList {
+
+		input := &ec2.TerminateInstancesInput{
+			InstanceIds: []*string{
+				aws.String(instance),
+			},
+		}
+
+		_, err := svc.TerminateInstances(input)
+		if err != nil {
+			if aerr, ok := err.(awserr.Error); ok {
+				switch aerr.Code() {
+				default:
+					fmt.Println(aerr.Error())
+				}
+			} else {
+				// Print the error, cast err to awserr.Error to get the Code and
+				// Message from an error.
+				fmt.Println(err.Error())
+			}
+			return
+		}
+
+		fmt.Printf("Terminating: %v\n", instance)
+	}
 
 }
