@@ -11,8 +11,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-// AutoScaleRoll will expand the ASG, roll the instances
-func AutoScaleRoll(instanceIDList []string, awsProfile []string) {
+// AutoScaleUp will expand the ASG, roll the instances
+func AutoScaleUp(instanceIDList []string, awsProfile []string) {
 	sess := sessionHelper(awsProfile[0])
 	var autoScaleGroupNames []string
 
@@ -20,7 +20,9 @@ func AutoScaleRoll(instanceIDList []string, awsProfile []string) {
 		autoScaleGroupNames = append(autoScaleGroupNames, asgLocator(instanceID, sess))
 	}
 
-	for _, autoScaleGroup := range autoScaleGroupNames {
+	cleanedAutoScaleGroupNames := removeDuplicateFromStringSlice(autoScaleGroupNames)
+
+	for _, autoScaleGroup := range cleanedAutoScaleGroupNames {
 		fmt.Println("Scaling up: ", autoScaleGroup)
 		asgScaler(autoScaleGroup, *sess)
 	}
@@ -53,11 +55,23 @@ func asgLocator(instanceID string, sess *session.Session) string {
 	return ""
 }
 
+func removeDuplicateFromStringSlice(stringSlice []string) []string {
+	keys := make(map[string]bool)
+	list := []string{}
+	for _, i := range stringSlice {
+		if _, value := keys[i]; !value {
+			keys[i] = true
+			list = append(list, i)
+		}
+	}
+	return list
+}
+
 func asgScaler(asgName string, sess session.Session) {
 	svc := autoscaling.New(&sess)
 
 	currentCapacity := asgGetCurrentDesiredCap(asgName, svc)
-	scaledUpCapacity := currentCapacity + currentCapacity
+	scaledUpCapacity := currentCapacity + 1
 
 	input := &autoscaling.SetDesiredCapacityInput{
 		AutoScalingGroupName: aws.String(asgName),
