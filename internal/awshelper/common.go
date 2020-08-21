@@ -50,8 +50,8 @@ func AsgScaleDown(asgNameList []string, awsProfile []string) {
 
 	for _, i := range asgNameList {
 
-		currentCapacity := asgGetCurrentDesiredCap(i, svc)
-		scaledDownCapacity := currentCapacity / 2
+		// currentCapacity := asgGetCurrentDesiredCap(i, svc)
+		scaledDownCapacity := int64(0)
 
 		input := &autoscaling.SetDesiredCapacityInput{
 			AutoScalingGroupName: aws.String(i),
@@ -64,7 +64,7 @@ func AsgScaleDown(asgNameList []string, awsProfile []string) {
 			log.Fatal(err)
 		}
 
-		fmt.Printf("Contracting (Reduce by Half) the AutoScalingGroup: %v.\n", i)
+		fmt.Printf("Scaling down the AutoScalingGroup: %v to %v.\n", i, scaledDownCapacity)
 	}
 
 }

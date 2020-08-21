@@ -18,27 +18,22 @@ var k8UpgradeNodesCmd = &cobra.Command{
 	Short: "Upgrade the k8 nodes in the kubernetes cluster by draining each node, then rolling the EC2 instances",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("This will take a moment...\n")
+		fmt.Println("This will take a moment...")
 
 		nodeNameList, nodeIDList, _ := k8helper.K8GetNodesList()
 
-		fmt.Println("Rolling the following nodes: ")
+		fmt.Println("List of original EC2 workers:")
 
 		for _, i := range nodeNameList {
 			fmt.Printf("- %v\n", i)
 		}
-		fmt.Println("\nProceed with Expanding the AutoScalingGroups?")
+		fmt.Println("\nProceed?")
 		if yesNo() {
-			asgNameList := awshelper.AutoScaleUp(nodeIDList, args)
-			fmt.Println("\nEnsure new instances have been deployed and registered with the K8 Cluster.\nProceed with draining old nodes?")
+			k8helper.K8NodeDrain(nodeNameList)
+			fmt.Println("\nProceed with Compacting the the original nodegroups?")
 			if yesNo() {
-				k8helper.K8NodeDrain(nodeNameList)
-				fmt.Println("\nProceed with Compacting the AutoScalingGroups?")
-				if yesNo() {
-					awshelper.AsgScaleDown(asgNameList, args)
-				} else {
-					os.Exit(1)
-				}
+				asgNameList := awshelper.GetAutoScaleGroupList(nodeIDList, args)
+				awshelper.AsgScaleDown(asgNameList, args)
 			} else {
 				os.Exit(1)
 			}

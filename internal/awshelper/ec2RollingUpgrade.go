@@ -29,6 +29,20 @@ func AutoScaleUp(instanceIDList []string, awsProfile []string) []string {
 	return cleanedAutoScaleGroupNames
 }
 
+// GetAutoScaleGroupList get list of autoscalegroups used by the existing nodegroups
+func GetAutoScaleGroupList(instanceIDList []string, awsProfile []string) []string {
+	sess := sessionHelper(awsProfile[0])
+	var autoScaleGroupNames []string
+
+	for _, instanceID := range instanceIDList {
+		autoScaleGroupNames = append(autoScaleGroupNames, asgLocator(instanceID, sess))
+	}
+
+	cleanedAutoScaleGroupNames := removeDuplicateFromStringSlice(autoScaleGroupNames)
+
+	return cleanedAutoScaleGroupNames
+}
+
 func asgLocator(instanceID string, sess *session.Session) string {
 	svc := ec2.New(sess)
 
