@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -20,6 +21,8 @@ func K8NodeDrain(nodeList []string) {
 	for _, i := range nodeList {
 		k8NodeCordon(i)
 		k8DeleteNodePods(i)
+		fmt.Println("Waiting before proceeding to next node")
+		time.Sleep(30 * time.Second)
 	}
 }
 
