@@ -30,7 +30,7 @@ var k8UpgradeNodesCmd = &cobra.Command{
 		for _, i := range nodeNameList {
 			fmt.Printf("- %v\n", i)
 		}
-		fmt.Println("\nBefore continuing, deploy the the blue/green group via Terraform")
+		fmt.Println("\nBefore continuing, deploy the the blue/green groups via Terraform")
 		fmt.Println("\nProceed with the migration?")
 		if yesNo() {
 			k8helper.K8NodeDrain(nodeNameList)
