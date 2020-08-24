@@ -16,7 +16,10 @@ func init() {
 var k8UpgradeNodesCmd = &cobra.Command{
 	Use:   "eks-upgrade-nodes [profile]",
 	Short: "Blue/Green migration for eks nodegroups",
-	Args:  cobra.MinimumNArgs(1),
+	Long: `Run this before spinning up the blue/green nodegroups in Terraform. This module assumes the current nodes in the K8 cluster will be depreciated.
+	This will grab the current instances, grab their Autoscalegroup IDs, and mark the instances as unschedulable. 
+	It will then delete each node of pods, excluding kube-system pods. Then scale down the Autoscalegroups to 0.`,
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("This will take a moment...")
 
@@ -27,10 +30,11 @@ var k8UpgradeNodesCmd = &cobra.Command{
 		for _, i := range nodeNameList {
 			fmt.Printf("- %v\n", i)
 		}
-		fmt.Println("\nProceed?")
+		fmt.Println("\nBefore continuing, deploy the the blue/green group via Terraform")
+		fmt.Println("\nProceed with the migration?")
 		if yesNo() {
 			k8helper.K8NodeDrain(nodeNameList)
-			fmt.Println("\nProceed with Compacting the the original nodegroups?")
+			fmt.Println("\nProceed with scaling down the the original nodegroups?")
 			if yesNo() {
 				asgNameList := awshelper.GetAutoScaleGroupList(nodeIDList, args)
 				awshelper.AsgScaleDown(asgNameList, args)
@@ -40,6 +44,8 @@ var k8UpgradeNodesCmd = &cobra.Command{
 		} else {
 			os.Exit(1)
 		}
+
+		fmt.Print("Completed...\nRemember to clean up Terraform code.")
 
 	},
 }

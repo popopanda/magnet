@@ -101,22 +101,3 @@ func asgScaleUp(asgName string, sess session.Session) {
 
 	fmt.Printf("Expanding (Doubling) the AutoScalingGroup: %v.\n", asgName)
 }
-
-func asgGetCurrentDesiredCap(asg string, service *autoscaling.AutoScaling) int64 {
-	input := &autoscaling.DescribeAutoScalingGroupsInput{
-		AutoScalingGroupNames: []*string{
-			aws.String(asg),
-		},
-	}
-
-	result, err := service.DescribeAutoScalingGroups(input)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, i := range result.AutoScalingGroups {
-		return aws.Int64Value(i.DesiredCapacity)
-	}
-
-	return 1
-}

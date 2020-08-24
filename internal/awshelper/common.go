@@ -48,23 +48,58 @@ func AsgScaleDown(asgNameList []string, awsProfile []string) {
 	sess := sessionHelper(awsProfile[0])
 	svc := autoscaling.New(sess)
 
+	scaledDownCapacity := int64(0)
+
 	for _, i := range asgNameList {
-
-		// currentCapacity := asgGetCurrentDesiredCap(i, svc)
-		scaledDownCapacity := int64(0)
-
-		input := &autoscaling.SetDesiredCapacityInput{
-			AutoScalingGroupName: aws.String(i),
-			DesiredCapacity:      aws.Int64(scaledDownCapacity),
-			HonorCooldown:        aws.Bool(true),
-		}
-
-		_, err := svc.SetDesiredCapacity(input)
-		if err != nil {
-			log.Fatal(err)
-		}
-
+		setASGMinSize(i, svc)
+		setASGDesiredCap(i, svc, scaledDownCapacity)
 		fmt.Printf("Scaling down the AutoScalingGroup: %v to %v.\n", i, scaledDownCapacity)
 	}
+}
 
+func setASGMinSize(asgName string, svc *autoscaling.AutoScaling) {
+	updateASGInput := &autoscaling.UpdateAutoScalingGroupInput{
+		AutoScalingGroupName: aws.String(asgName),
+		MinSize:              aws.Int64(0),
+	}
+
+	_, err := svc.UpdateAutoScalingGroup(updateASGInput)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func setASGDesiredCap(asgName string, svc *autoscaling.AutoScaling, scaledDownInt int64) {
+	// currentCapacity := asgGetCurrentDesiredCap(i, svc)
+
+	desiredCapInput := &autoscaling.SetDesiredCapacityInput{
+		AutoScalingGroupName: aws.String(asgName),
+		DesiredCapacity:      aws.Int64(scaledDownInt),
+		HonorCooldown:        aws.Bool(true),
+	}
+
+	_, err := svc.SetDesiredCapacity(desiredCapInput)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func asgGetCurrentDesiredCap(asg string, service *autoscaling.AutoScaling) int64 {
+	input := &autoscaling.DescribeAutoScalingGroupsInput{
+		AutoScalingGroupNames: []*string{
+			aws.String(asg),
+		},
+	}
+
+	result, err := service.DescribeAutoScalingGroups(input)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, i := range result.AutoScalingGroups {
+		return aws.Int64Value(i.DesiredCapacity)
+	}
+
+	return 1
 }

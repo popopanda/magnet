@@ -18,8 +18,11 @@ type patchStringValue struct {
 
 // K8NodeDrain drains the node
 func K8NodeDrain(nodeList []string) {
+	for _, x := range nodeList {
+		k8NodeCordon(x)
+	}
+
 	for _, i := range nodeList {
-		k8NodeCordon(i)
 		k8DeleteNodePods(i)
 		fmt.Println("Waiting before proceeding to next node")
 		time.Sleep(30 * time.Second)
@@ -29,6 +32,7 @@ func K8NodeDrain(nodeList []string) {
 func k8DeleteNodePods(nodeInstance string) {
 	clientSet := k8ClientInit()
 
+	fmt.Printf("Deleting Pods on %v \n", nodeInstance)
 	pods, err := clientSet.CoreV1().Pods("").List(metav1.ListOptions{
 		FieldSelector: "spec.nodeName=" + nodeInstance,
 	})
