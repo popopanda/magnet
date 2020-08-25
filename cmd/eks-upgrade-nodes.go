@@ -45,7 +45,7 @@ var k8UpgradeNodesCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		fmt.Print("Completed...\nRemember to clean up Terraform code.")
+		fmt.Print("Completed...\nRemember to clean up Terraform code.\n")
 
 	},
 }
