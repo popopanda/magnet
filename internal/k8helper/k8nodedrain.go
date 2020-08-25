@@ -19,9 +19,9 @@ type patchStringValue struct {
 
 // K8NodeDrain drains the node
 func K8NodeDrain(nodeList []string) {
-	// for _, x := range nodeList {
-	// 	k8NodeCordon(x)
-	// }
+	for _, x := range nodeList {
+		k8NodeCordon(x)
+	}
 
 	// for _, i := range nodeList {
 	// 	k8DeleteNodePods(i)
@@ -86,7 +86,7 @@ func k8NodeCordon(nodeInstance string) {
 
 //Exec kubectl drain
 func drainNode(nodeInstance string) {
-	fmt.Printf("\nDraining: %v", nodeInstance)
+	fmt.Printf("\nDraining: %v...\n", nodeInstance)
 
 	kubectl := "kubectl"
 	drainArgsSlice := []string{"drain", nodeInstance, "--delete-local-data", "--ignore-daemonsets"}
