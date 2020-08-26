@@ -14,7 +14,7 @@ var rootCmd = &cobra.Command{
 	Short: "Magnet simplifies commands",
 	Long:  `Created to simplify some tasks that Devops does day to day`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("welcome")
+		fmt.Println("Run magnet -h to get list of commands")
 	},
 }
 
