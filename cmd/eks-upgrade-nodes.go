@@ -34,19 +34,16 @@ var k8UpgradeNodesCmd = &cobra.Command{
 		fmt.Println("\nProceed with the migration?")
 		if yesNo() {
 			k8helper.K8NodeDrain(nodeNameList)
+
+			asgNameList := awshelper.GetAutoScaleGroupList(nodeIDList, args)
+
+			for _, asgName := range asgNameList {
+				fmt.Printf("%v will be scaled down.\n", asgName)
+			}
+
 			fmt.Println("\nProceed with scaling down the the original nodegroups?")
 			if yesNo() {
-				asgNameList := awshelper.GetAutoScaleGroupList(nodeIDList, args)
-
-				for _, asgName := range asgNameList {
-					fmt.Printf("%v will be scaled down.\n", asgName)
-				}
-				fmt.Println("Proceed?")
-				if yesNo() {
-					awshelper.AsgScaleDown(asgNameList, args)
-				} else {
-					os.Exit(1)
-				}
+				awshelper.AsgScaleDown(asgNameList, args)
 			} else {
 				os.Exit(1)
 			}
