@@ -94,7 +94,7 @@ func drainNode(nodeInstance string) {
 
 	out, err := drainCmd.Output()
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 	}
 
 	fmt.Println(string(out))

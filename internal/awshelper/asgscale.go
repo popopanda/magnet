@@ -2,7 +2,6 @@ package awshelper
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
@@ -21,14 +20,14 @@ func AsgScaleDown(asgNameList []string, awsProfile []string) {
 		_, errorSetMin := setASGMinSize(i, svc, minSizeInt)
 
 		if errorSetMin != nil {
-			log.Printf("Unexpeced Error: %v\n", errorSetMin)
+			fmt.Printf("Unexpeced Error: %v\n", errorSetMin)
 			continue
 		}
 
 		_, errorSetDesired := setASGDesiredCap(i, svc, scaledDownCapacity)
 
 		if errorSetDesired != nil {
-			log.Printf("Unexpeced Error: %v\n", errorSetDesired)
+			fmt.Printf("Unexpeced Error: %v\n", errorSetDesired)
 			continue
 		}
 	}

@@ -1,6 +1,7 @@
 package awshelper
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -61,8 +62,7 @@ func asgLocator(instanceID string, sess *session.Session) string {
 
 	result, err := svc.DescribeInstances(ec2Input)
 	if err != nil {
-		log.Fatal(err)
-
+		fmt.Println(err)
 	}
 
 	for _, reservations := range result.Reservations {
@@ -86,7 +86,7 @@ func asgGetCurrentDesiredCap(asg string, service *autoscaling.AutoScaling) int64
 
 	result, err := service.DescribeAutoScalingGroups(input)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 
 	for _, i := range result.AutoScalingGroups {
