@@ -19,9 +19,9 @@ type patchStringValue struct {
 
 // K8NodeDrain drains the node
 func K8NodeDrain(nodeList []string) {
-	for _, x := range nodeList {
-		k8NodeCordon(x)
-	}
+	// for _, x := range nodeList {
+	// 	k8NodeCordon(x)
+	// }
 
 	// for _, i := range nodeList {
 	// 	k8DeleteNodePods(i)
