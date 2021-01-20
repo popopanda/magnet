@@ -19,20 +19,10 @@ type patchStringValue struct {
 
 // K8NodeDrain drains the node
 func K8NodeDrain(nodeList []string) {
-	// for _, x := range nodeList {
-	// 	k8NodeCordon(x)
-	// }
-
-	// for _, i := range nodeList {
-	// 	k8DeleteNodePods(i)
-	// 	fmt.Println("\nWaiting before proceeding to next node")
-	// 	time.Sleep(30 * time.Second)
-	// }
-
 	for _, node := range nodeList {
 		drainNode(node)
 		fmt.Println("\nWaiting before proceeding to next node")
-		time.Sleep(10 * time.Second)
+		time.Sleep(30 * time.Second)
 	}
 }
 
@@ -64,11 +54,13 @@ func k8DeleteNodePods(nodeInstance string) {
 func k8NodeCordon(nodeInstance string) {
 	clientSet := k8ClientInit()
 
-	payload := []patchStringValue{{
-		Op:    "replace",
-		Path:  "/spec/unschedulable",
-		Value: true,
-	}}
+	payload := []patchStringValue{
+		{
+			Op:    "replace",
+			Path:  "/spec/unschedulable",
+			Value: true,
+		},
+	}
 	payloadBytes, _ := json.Marshal(payload)
 
 	_, err := clientSet.
